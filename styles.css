@@ -71,7 +71,7 @@ input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rg
 .activity-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
 .activity-card .actions { display: flex; gap: 7px; margin-top: 16px; }
 .member-table { margin-top: 14px; display: grid; gap: 7px; }
-.member-row { padding: 13px 15px; border: 1px solid var(--border); border-radius: 13px; background: var(--white); display: grid; grid-template-columns: 1.5fr 1fr .6fr .7fr auto; align-items: center; gap: 12px; }
+.member-row { padding: 13px 15px; border: 1px solid var(--border); border-radius: 13px; background: var(--white); display: grid; grid-template-columns: 1.5fr 1fr .6fr auto; align-items: center; gap: 12px; }
 .member-row > span { color: var(--muted); font-size: 12px; }
 .member-row .actions { display: flex; gap: 6px; }
 .icon-btn { width: 34px; height: 34px; border: 0; border-radius: 9px; background: #f0f5f2; color: var(--ink); }

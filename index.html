@@ -16,7 +16,7 @@
   <header class="topbar">
     <div><p class="eyebrow">CIRCLE ATTENDANCE</p><h1>Circle Check</h1></div>
     <nav>
-      <button class="nav-btn active" data-view="reception">受付</button>
+      <button class="nav-btn active" data-view="reception">参加</button>
       <button class="nav-btn" data-view="activities">活動履歴</button>
       <button class="nav-btn" data-view="members">メンバー</button>
       <button class="nav-btn" data-view="stats">集計</button>
@@ -25,28 +25,27 @@
 
   <main>
     <aside id="install-banner" class="install-banner" hidden>
-      <div><strong>スマホにインストールできます</strong><span id="install-help">ホーム画面からすぐ受付を開始できます。</span></div>
+      <div><strong>スマホにインストールできます</strong><span id="install-help">ホーム画面からすぐ参加記録を開始できます。</span></div>
       <button id="install-app" class="primary">インストール</button>
       <button id="dismiss-install" class="icon-btn" aria-label="閉じる">×</button>
     </aside>
 
     <section id="reception" class="view active">
       <div class="hero">
-        <div><p class="eyebrow">TODAY'S CHECK-IN</p><h2>活動日の受付</h2><p>LINE投票の「参加」メンバーから、出席と参加費をすばやく記録できます。</p></div>
-        <div class="hero-stat"><strong id="today-attendance">0</strong><span>人 出席</span></div>
+        <div><p class="eyebrow">TODAY'S CHECK-IN</p><h2>活動日の参加記録</h2><p>参加率の高いメンバーから順に、参加と参加費をすばやく記録できます。</p></div>
+        <div class="hero-stat"><strong id="today-attendance">0</strong><span>人 参加</span></div>
         <div class="hero-stat"><strong id="today-paid">0</strong><span>人 支払済み</span></div>
       </div>
       <div class="panel activity-setup">
         <label>活動日<input id="activity-date" type="date"></label>
         <label>活動場所<input id="activity-location" type="text" placeholder="例：市民体育館"></label>
-        <button id="create-activity" class="primary">この内容で受付を始める</button>
+        <button id="create-activity" class="primary">この内容で参加記録を始める</button>
       </div>
-      <div id="reception-empty" class="empty"><strong>受付する活動を作成してください</strong><span>日付と場所を入力すると、メンバーの出席を記録できます。</span></div>
+      <div id="reception-empty" class="empty"><strong>参加を記録する活動を作成してください</strong><span>日付と場所を入力すると、メンバーの参加を記録できます。</span></div>
       <div id="reception-content" hidden>
-        <div class="section-heading"><div><p class="eyebrow">PRIORITY</p><h3>参加予定のメンバー</h3></div><span id="current-activity-label" class="pill"></span></div>
-        <div id="priority-list" class="member-list"></div>
-        <div class="section-heading add-heading"><div><p class="eyebrow">WALK-IN</p><h3>未定・飛び入り参加を追加</h3></div></div>
-        <div class="panel search-panel"><input id="walkin-search" type="search" placeholder="名前・大学で検索"><div id="walkin-results" class="search-results"></div></div>
+        <div class="section-heading"><div><p class="eyebrow">MEMBERS</p><h3>メンバーを参加率順に表示</h3></div><span id="current-activity-label" class="pill"></span></div>
+        <div class="panel search-panel"><input id="attendance-search" type="search" placeholder="名前・大学で検索"></div>
+        <div id="attendance-list" class="member-list"></div>
       </div>
     </section>
 
@@ -81,7 +80,6 @@
       <label>名前<input id="member-name" required></label>
       <label>大学<input id="member-university" placeholder="例：〇〇大学"></label>
       <label>性別<select id="member-gender"><option value="">未設定</option><option>男性</option><option>女性</option><option>その他</option></select></label>
-      <label>LINE投票<select id="member-vote"><option>参加</option><option>未定</option><option>不参加</option><option>未回答</option></select></label>
       <div class="modal-actions"><button type="button" class="secondary close-modal">キャンセル</button><button class="primary" value="default">保存</button></div>
     </form>
   </dialog>

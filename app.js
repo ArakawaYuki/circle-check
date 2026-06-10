@@ -1,9 +1,9 @@
 const STORAGE_KEY = "circle-check-v1";
 const sampleMembers = [
-  ["田中 悠斗", "青葉大学", "男性", "参加"], ["佐藤 美咲", "青葉大学", "女性", "参加"],
-  ["鈴木 健太", "中央工科大学", "男性", "未定"], ["高橋 彩", "西山大学", "女性", "参加"],
-  ["伊藤 翔", "中央工科大学", "男性", "不参加"], ["渡辺 葵", "西山大学", "女性", "未回答"],
-].map(([name, university, gender, vote], i) => ({ id: `m${i + 1}`, name, university, gender, vote }));
+  ["田中 悠斗", "青葉大学", "男性"], ["佐藤 美咲", "青葉大学", "女性"],
+  ["鈴木 健太", "中央工科大学", "男性"], ["高橋 彩", "西山大学", "女性"],
+  ["伊藤 翔", "中央工科大学", "男性"], ["渡辺 葵", "西山大学", "女性"],
+].map(([name, university, gender], i) => ({ id: `m${i + 1}`, name, university, gender }));
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || { members: sampleMembers, activities: [], currentActivityId: null };
 const $ = id => document.getElementById(id);
@@ -29,14 +29,20 @@ $("create-activity").addEventListener("click", () => {
   const existing = state.activities.find(a => a.date === date && a.location === location);
   if (existing) state.currentActivityId = existing.id;
   else {
-    const activity = { id: uid("a"), date, location, records: state.members.filter(m => m.vote === "参加").map(m => ({ memberId: m.id, attended: false, paid: false })) };
+    const activity = { id: uid("a"), date, location, records: [] };
     state.activities.unshift(activity); state.currentActivityId = activity.id;
   }
-  save(); toast("受付を開始しました");
+  save(); toast("参加記録を開始しました");
 });
 
-function personHtml(m) {
-  return `<div class="person"><div class="avatar">${esc(m.name.slice(0, 1))}</div><div class="person-info"><strong>${esc(m.name)}</strong><span>${esc(m.university || "大学未設定")} ・ 投票：${esc(m.vote)}</span></div></div>`;
+function participationStats(memberId, excludedActivityId = null) {
+  const activities = state.activities.filter(a => a.id !== excludedActivityId);
+  const count = activities.filter(a => recordFor(a, memberId)?.attended).length;
+  return { count, rate: activities.length ? Math.round(count / activities.length * 100) : 0 };
+}
+function personHtml(m, rate = null) {
+  const rateText = rate === null ? "" : ` ・ 参加率：${rate}%`;
+  return `<div class="person"><div class="avatar">${esc(m.name.slice(0, 1))}</div><div class="person-info"><strong>${esc(m.name)}</strong><span>${esc(m.university || "大学未設定")}${rateText}</span></div></div>`;
 }
 function renderReception() {
   const activity = currentActivity();
@@ -45,13 +51,12 @@ function renderReception() {
   $("today-paid").textContent = activity?.records.filter(r => r.paid).length || 0;
   if (!activity) return;
   $("current-activity-label").textContent = `${formatDate(activity.date)} / ${activity.location}`;
-  const priority = state.members.filter(m => m.vote === "参加");
-  $("priority-list").innerHTML = priority.length ? priority.map(m => checkRow(m, activity)).join("") : `<div class="empty">「参加」投票のメンバーはいません</div>`;
-  renderWalkinResults();
+  renderAttendanceList();
 }
 function checkRow(m, activity) {
   const record = recordFor(activity, m.id), attended = !!record?.attended, paid = !!record?.paid;
-  return `<div class="check-row">${personHtml(m)}<button class="toggle ${attended ? "on" : ""}" onclick="toggleRecord('${m.id}','attended')">${attended ? "✓ 出席" : "出席する"}</button><button class="toggle paid ${paid ? "on" : ""}" onclick="toggleRecord('${m.id}','paid')" ${!attended ? "disabled" : ""}>${paid ? "✓ 100円済" : "100円"}</button></div>`;
+  const { rate } = participationStats(m.id, activity.id);
+  return `<div class="check-row">${personHtml(m, rate)}<button class="toggle ${attended ? "on" : ""}" onclick="toggleRecord('${m.id}','attended')">${attended ? "✓ 参加" : "参加する"}</button><button class="toggle paid ${paid ? "on" : ""}" onclick="toggleRecord('${m.id}','paid')" ${!attended ? "disabled" : ""}>${paid ? "✓ 100円済" : "100円"}</button></div>`;
 }
 window.toggleRecord = (memberId, type) => {
   const activity = currentActivity(); let record = recordFor(activity, memberId);
@@ -59,21 +64,23 @@ window.toggleRecord = (memberId, type) => {
   record[type] = !record[type]; if (type === "attended" && !record.attended) record.paid = false; save();
 };
 
-$("walkin-search").addEventListener("input", renderWalkinResults);
-function renderWalkinResults() {
+$("attendance-search").addEventListener("input", renderAttendanceList);
+function renderAttendanceList() {
   const activity = currentActivity(); if (!activity) return;
-  const q = $("walkin-search").value.trim().toLowerCase();
-  const members = state.members.filter(m => m.vote !== "参加" && (!q || `${m.name} ${m.university}`.toLowerCase().includes(q)));
-  $("walkin-results").innerHTML = members.map(m => {
-    const attended = !!recordFor(activity, m.id)?.attended;
-    return `<div class="search-result">${personHtml(m)}<button class="${attended ? "secondary" : "primary"}" onclick="toggleRecord('${m.id}','attended')">${attended ? "出席を取消" : "＋ 出席追加"}</button></div>`;
-  }).join("") || `<div class="empty">該当するメンバーはいません</div>`;
+  const q = $("attendance-search").value.trim().toLowerCase();
+  const members = state.members
+    .filter(m => !q || `${m.name} ${m.university}`.toLowerCase().includes(q))
+    .sort((a, b) => {
+      const aStats = participationStats(a.id, activity.id), bStats = participationStats(b.id, activity.id);
+      return bStats.rate - aStats.rate || bStats.count - aStats.count || a.name.localeCompare(b.name, "ja");
+    });
+  $("attendance-list").innerHTML = members.length ? members.map(m => checkRow(m, activity)).join("") : `<div class="empty">該当するメンバーはいません</div>`;
 }
 
 function renderActivities() {
   $("activity-list").innerHTML = state.activities.length ? state.activities.map(a => {
     const attended = a.records.filter(r => r.attended).length, paid = a.records.filter(r => r.paid).length;
-    return `<div class="panel activity-card"><p class="eyebrow">${formatDate(a.date)}</p><h3>${esc(a.location)}</h3><div class="activity-meta"><span>出席 ${attended}人</span><span>徴収 ¥${paid * 100}</span></div><div class="actions"><button class="secondary" onclick="openActivity('${a.id}')">受付を編集</button><button class="danger" onclick="deleteActivity('${a.id}')">削除</button></div></div>`;
+    return `<div class="panel activity-card"><p class="eyebrow">${formatDate(a.date)}</p><h3>${esc(a.location)}</h3><div class="activity-meta"><span>参加 ${attended}人</span><span>徴収 ¥${paid * 100}</span></div><div class="actions"><button class="secondary" onclick="openActivity('${a.id}')">参加を編集</button><button class="danger" onclick="deleteActivity('${a.id}')">削除</button></div></div>`;
   }).join("") : `<div class="empty">活動履歴はまだありません</div>`;
 }
 window.openActivity = id => { state.currentActivityId = id; save(); showView("reception"); };
@@ -86,23 +93,23 @@ function openMemberModal(id = "") {
   const m = state.members.find(x => x.id === id);
   $("member-form-title").textContent = m ? "メンバー編集" : "メンバー追加";
   $("member-id").value = m?.id || ""; $("member-name").value = m?.name || ""; $("member-university").value = m?.university || "";
-  $("member-gender").value = m?.gender || ""; $("member-vote").value = m?.vote || "未回答"; $("member-modal").showModal();
+  $("member-gender").value = m?.gender || ""; $("member-modal").showModal();
 }
 window.editMember = openMemberModal;
 $("member-form").addEventListener("submit", e => {
   e.preventDefault();
-  const data = { id: $("member-id").value || uid("m"), name: $("member-name").value.trim(), university: $("member-university").value.trim(), gender: $("member-gender").value, vote: $("member-vote").value };
+  const data = { id: $("member-id").value || uid("m"), name: $("member-name").value.trim(), university: $("member-university").value.trim(), gender: $("member-gender").value };
   if (!data.name) return;
   const index = state.members.findIndex(m => m.id === data.id); if (index >= 0) state.members[index] = data; else state.members.push(data);
   $("member-modal").close(); save(); toast("メンバー情報を保存しました");
 });
 window.deleteMember = id => {
-  if (!confirm("このメンバーを削除しますか？ 過去の出席記録も集計対象外になります。")) return;
+  if (!confirm("このメンバーを削除しますか？ 過去の参加記録も集計対象外になります。")) return;
   state.members = state.members.filter(m => m.id !== id); state.activities.forEach(a => a.records = a.records.filter(r => r.memberId !== id)); save();
 };
 function renderMembers() {
   const q = $("member-search").value.trim().toLowerCase(), members = state.members.filter(m => !q || `${m.name} ${m.university}`.toLowerCase().includes(q));
-  $("member-list").innerHTML = members.map(m => `<div class="member-row">${personHtml(m)}<span>${esc(m.university || "未設定")}</span><span>${esc(m.gender || "未設定")}</span><span>${esc(m.vote)}</span><div class="actions"><button class="icon-btn" onclick="editMember('${m.id}')">編集</button><button class="icon-btn" onclick="deleteMember('${m.id}')">削除</button></div></div>`).join("") || `<div class="empty">メンバーがいません</div>`;
+  $("member-list").innerHTML = members.map(m => `<div class="member-row">${personHtml(m)}<span>${esc(m.university || "未設定")}</span><span>${esc(m.gender || "未設定")}</span><div class="actions"><button class="icon-btn" onclick="editMember('${m.id}')">編集</button><button class="icon-btn" onclick="deleteMember('${m.id}')">削除</button></div></div>`).join("") || `<div class="empty">メンバーがいません</div>`;
 }
 
 function renderStats() {
