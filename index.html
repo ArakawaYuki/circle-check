@@ -39,6 +39,8 @@
       <div class="panel activity-setup">
         <label>活動日<input id="activity-date" type="date"></label>
         <label>活動場所<input id="activity-location" type="text" placeholder="例：市民体育館"></label>
+        <label>体育館代<input id="activity-expense" type="number" min="0" step="1" value="0" placeholder="例：2000"></label>
+        <label>徴収担当者<select id="activity-collector"><option value="">未設定</option></select></label>
         <button id="create-activity" class="primary">この内容で参加記録を始める</button>
       </div>
       <div id="reception-empty" class="empty"><strong>参加を記録する活動を作成してください</strong><span>日付と場所を入力すると、メンバーの参加を記録できます。</span></div>
@@ -57,13 +59,23 @@
       <div class="page-heading"><div><p class="eyebrow">ROSTER</p><h2>メンバー管理</h2></div><button id="open-member-modal" class="primary">＋ メンバー追加</button></div>
       <div class="panel toolbar"><input id="member-search" type="search" placeholder="名前・大学で検索"></div>
       <div id="member-list" class="member-table"></div>
+      <div class="panel data-panel">
+        <div><p class="eyebrow">BACKUP</p><h3>データのバックアップ・復元</h3><p>メンバー、活動、参加費、体育館代をまとめて保存できます。</p></div>
+        <div class="data-actions">
+          <button id="export-backup" class="secondary">バックアップを保存</button>
+          <button id="import-backup" class="secondary">バックアップから復元</button>
+          <input id="backup-file" type="file" accept="application/json,.json" hidden>
+        </div>
+      </div>
     </section>
     <section id="stats" class="view">
-      <div class="page-heading"><div><p class="eyebrow">REPORT</p><h2>参加状況の集計</h2></div><button id="export-csv" class="primary">Excel用CSVを出力</button></div>
+      <div class="page-heading"><div><p class="eyebrow">REPORT</p><h2>参加状況の集計</h2></div><div class="report-actions"><button id="export-csv" class="secondary">メンバーCSV</button><button id="export-activities-csv" class="primary">活動・収支CSV</button></div></div>
       <div class="summary-grid">
         <div class="summary-card"><span>活動回数</span><strong id="stat-activities">0</strong></div>
         <div class="summary-card"><span>延べ参加者</span><strong id="stat-attendance">0</strong></div>
         <div class="summary-card"><span>参加費徴収</span><strong id="stat-revenue">¥0</strong></div>
+        <div class="summary-card expense-card"><span>体育館代</span><strong id="stat-expense">¥0</strong></div>
+        <div class="summary-card balance-card"><span>収支</span><strong id="stat-balance">¥0</strong></div>
         <div class="summary-card"><span>平均参加人数</span><strong id="stat-average">0</strong></div>
       </div>
       <div class="stats-layout">
