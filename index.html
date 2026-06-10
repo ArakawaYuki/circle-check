@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#155e40">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Circle Check">
+  <title>Circle Check</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">CIRCLE ATTENDANCE</p><h1>Circle Check</h1></div>
+    <nav>
+      <button class="nav-btn active" data-view="reception">受付</button>
+      <button class="nav-btn" data-view="activities">活動履歴</button>
+      <button class="nav-btn" data-view="members">メンバー</button>
+      <button class="nav-btn" data-view="stats">集計</button>
+    </nav>
+  </header>
+
+  <main>
+    <aside id="install-banner" class="install-banner" hidden>
+      <div><strong>スマホにインストールできます</strong><span id="install-help">ホーム画面からすぐ受付を開始できます。</span></div>
+      <button id="install-app" class="primary">インストール</button>
+      <button id="dismiss-install" class="icon-btn" aria-label="閉じる">×</button>
+    </aside>
+
+    <section id="reception" class="view active">
+      <div class="hero">
+        <div><p class="eyebrow">TODAY'S CHECK-IN</p><h2>活動日の受付</h2><p>LINE投票の「参加」メンバーから、出席と参加費をすばやく記録できます。</p></div>
+        <div class="hero-stat"><strong id="today-attendance">0</strong><span>人 出席</span></div>
+        <div class="hero-stat"><strong id="today-paid">0</strong><span>人 支払済み</span></div>
+      </div>
+      <div class="panel activity-setup">
+        <label>活動日<input id="activity-date" type="date"></label>
+        <label>活動場所<input id="activity-location" type="text" placeholder="例：市民体育館"></label>
+        <button id="create-activity" class="primary">この内容で受付を始める</button>
+      </div>
+      <div id="reception-empty" class="empty"><strong>受付する活動を作成してください</strong><span>日付と場所を入力すると、メンバーの出席を記録できます。</span></div>
+      <div id="reception-content" hidden>
+        <div class="section-heading"><div><p class="eyebrow">PRIORITY</p><h3>参加予定のメンバー</h3></div><span id="current-activity-label" class="pill"></span></div>
+        <div id="priority-list" class="member-list"></div>
+        <div class="section-heading add-heading"><div><p class="eyebrow">WALK-IN</p><h3>未定・飛び入り参加を追加</h3></div></div>
+        <div class="panel search-panel"><input id="walkin-search" type="search" placeholder="名前・大学で検索"><div id="walkin-results" class="search-results"></div></div>
+      </div>
+    </section>
+
+    <section id="activities" class="view">
+      <div class="page-heading"><div><p class="eyebrow">HISTORY</p><h2>活動履歴</h2></div></div>
+      <div id="activity-list" class="card-grid"></div>
+    </section>
+    <section id="members" class="view">
+      <div class="page-heading"><div><p class="eyebrow">ROSTER</p><h2>メンバー管理</h2></div><button id="open-member-modal" class="primary">＋ メンバー追加</button></div>
+      <div class="panel toolbar"><input id="member-search" type="search" placeholder="名前・大学で検索"></div>
+      <div id="member-list" class="member-table"></div>
+    </section>
+    <section id="stats" class="view">
+      <div class="page-heading"><div><p class="eyebrow">REPORT</p><h2>参加状況の集計</h2></div><button id="export-csv" class="primary">Excel用CSVを出力</button></div>
+      <div class="summary-grid">
+        <div class="summary-card"><span>活動回数</span><strong id="stat-activities">0</strong></div>
+        <div class="summary-card"><span>延べ参加者</span><strong id="stat-attendance">0</strong></div>
+        <div class="summary-card"><span>参加費徴収</span><strong id="stat-revenue">¥0</strong></div>
+        <div class="summary-card"><span>平均参加人数</span><strong id="stat-average">0</strong></div>
+      </div>
+      <div class="stats-layout">
+        <div class="panel"><div class="section-heading"><h3>メンバー別</h3></div><div id="member-stats"></div></div>
+        <div class="panel"><div class="section-heading"><h3>大学別</h3></div><div id="university-stats"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="member-modal">
+    <form id="member-form" method="dialog">
+      <div class="modal-heading"><h3 id="member-form-title">メンバー追加</h3><button type="button" class="icon-btn close-modal">×</button></div>
+      <input id="member-id" type="hidden">
+      <label>名前<input id="member-name" required></label>
+      <label>大学<input id="member-university" placeholder="例：〇〇大学"></label>
+      <label>性別<select id="member-gender"><option value="">未設定</option><option>男性</option><option>女性</option><option>その他</option></select></label>
+      <label>LINE投票<select id="member-vote"><option>参加</option><option>未定</option><option>不参加</option><option>未回答</option></select></label>
+      <div class="modal-actions"><button type="button" class="secondary close-modal">キャンセル</button><button class="primary" value="default">保存</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
