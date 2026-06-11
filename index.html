@@ -13,14 +13,30 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div id="auth-screen" class="auth-screen">
+    <form id="login-form" class="auth-card">
+      <img src="icons/icon-192.png" alt="" class="auth-logo">
+      <p class="eyebrow">SHARED ATTENDANCE</p>
+      <h2>v.ridge参加記録</h2>
+      <p>許可された利用者のメールアドレスとパスワードでログインしてください。</p>
+      <label>メールアドレス<input id="login-email" type="email" autocomplete="email" required></label>
+      <label>パスワード<input id="login-password" type="password" autocomplete="current-password" required></label>
+      <button id="login-button" class="primary">ログイン</button>
+      <span id="login-error" class="form-error"></span>
+    </form>
+  </div>
   <header class="topbar">
     <div><p class="eyebrow">V.RIDGE ATTENDANCE</p><h1>v.ridge参加記録</h1></div>
-    <nav>
+    <nav id="app-nav">
       <button class="nav-btn active" data-view="reception">参加</button>
       <button class="nav-btn" data-view="activities">活動履歴</button>
       <button class="nav-btn" data-view="members">メンバー</button>
       <button class="nav-btn" data-view="stats">集計</button>
     </nav>
+    <div class="account-area">
+      <span id="sync-status" class="sync-status">未接続</span>
+      <button id="logout-button" class="secondary">ログアウト</button>
+    </div>
   </header>
 
   <main>
@@ -62,6 +78,7 @@
       <div class="panel data-panel">
         <div><p class="eyebrow">BACKUP</p><h3>データのバックアップ・復元</h3><p>メンバー、活動、参加費、体育館代をまとめて保存できます。</p></div>
         <div class="data-actions">
+          <button id="migrate-local" class="primary" hidden>端末データを共有へ移行</button>
           <button id="export-backup" class="secondary">バックアップを保存</button>
           <button id="import-backup" class="secondary">バックアップから復元</button>
           <input id="backup-file" type="file" accept="application/json,.json" hidden>
@@ -96,6 +113,7 @@
     </form>
   </dialog>
   <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
