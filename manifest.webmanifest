@@ -1,7 +1,7 @@
 {
-  "name": "Circle Check",
-  "short_name": "Circle Check",
-  "description": "サークル活動の出席と参加費を記録・集計するアプリ",
+  "name": "v.ridge参加記録",
+  "short_name": "v.ridge参加",
+  "description": "v.ridgeの参加と参加費を記録・集計するアプリ",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
@@ -9,7 +9,7 @@
   "background_color": "#f6f3ea",
   "theme_color": "#155e40",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }
