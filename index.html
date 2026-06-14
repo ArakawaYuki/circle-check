@@ -24,6 +24,16 @@
       <button id="login-button" class="primary">ログイン</button>
       <span id="login-error" class="form-error"></span>
     </form>
+    <form id="recovery-form" class="auth-card" hidden>
+      <img src="icons/icon-192.png" alt="" class="auth-logo">
+      <p class="eyebrow">PASSWORD RECOVERY</p>
+      <h2>新しいパスワードを設定</h2>
+      <p>今後ログインに使用する新しいパスワードを入力してください。</p>
+      <label>新しいパスワード<input id="recovery-password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>新しいパスワード（確認）<input id="recovery-password-confirm" type="password" autocomplete="new-password" minlength="8" required></label>
+      <button id="recovery-button" class="primary">パスワードを変更</button>
+      <span id="recovery-error" class="form-error"></span>
+    </form>
   </div>
   <header class="topbar">
     <div><p class="eyebrow">V.RIDGE ATTENDANCE</p><h1>v.ridge参加記録</h1></div>

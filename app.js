@@ -27,6 +27,7 @@ let currentUser = null;
 let currentRole = null;
 let realtimeChannel = null;
 let reloadTimer = null;
+let recoveryMode = false;
 
 const $ = id => document.getElementById(id);
 const esc = (value = "") => String(value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -83,8 +84,14 @@ const roleLabel = role => ({ admin: "管理者", editor: "編集者", viewer: "�
 
 async function initializeUser(session) {
   currentUser = session?.user || null;
+  if (recoveryMode) {
+    $("auth-screen").hidden = false;
+    showRecoveryForm();
+    return;
+  }
   if (!currentUser) {
     $("auth-screen").hidden = false;
+    showLoginForm();
     return;
   }
   try {
@@ -116,6 +123,15 @@ function scheduleReload() {
   reloadTimer = setTimeout(() => loadCloudState({ quiet: true }), 350);
 }
 
+function showLoginForm() {
+  $("login-form").hidden = false;
+  $("recovery-form").hidden = true;
+}
+function showRecoveryForm() {
+  $("login-form").hidden = true;
+  $("recovery-form").hidden = false;
+}
+
 $("login-form").addEventListener("submit", async event => {
   event.preventDefault();
   $("login-error").textContent = "";
@@ -124,8 +140,32 @@ $("login-form").addEventListener("submit", async event => {
   $("login-button").disabled = false;
   if (error) $("login-error").textContent = "メールアドレスまたはパスワードを確認してください。";
 });
+$("recovery-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  $("recovery-error").textContent = "";
+  const password = $("recovery-password").value;
+  if (password !== $("recovery-password-confirm").value) {
+    $("recovery-error").textContent = "確認用パスワードが一致しません。";
+    return;
+  }
+  $("recovery-button").disabled = true;
+  const { error } = await db.auth.updateUser({ password });
+  $("recovery-button").disabled = false;
+  if (error) {
+    $("recovery-error").textContent = "パスワードを変更できませんでした。リンクを再発行してください。";
+    return;
+  }
+  recoveryMode = false;
+  history.replaceState({}, document.title, location.pathname);
+  toast("パスワードを変更しました");
+  const { data } = await db.auth.getSession();
+  await initializeUser(data.session);
+});
 $("logout-button").addEventListener("click", async () => { await db.auth.signOut(); location.reload(); });
-db.auth.onAuthStateChange((_event, session) => setTimeout(() => initializeUser(session), 0));
+db.auth.onAuthStateChange((event, session) => {
+  if (event === "PASSWORD_RECOVERY") recoveryMode = true;
+  setTimeout(() => initializeUser(session), 0);
+});
 db.auth.getSession().then(({ data }) => initializeUser(data.session));
 
 function applyPermissions() {
