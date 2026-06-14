@@ -1,4 +1,4 @@
-const CACHE_NAME = "circle-check-v13";
+const CACHE_NAME = "circle-check-v14";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", event => {

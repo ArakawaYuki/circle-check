@@ -207,8 +207,10 @@ $("create-activity").addEventListener("click", async () => {
 
 function participationStats(memberId, excludedActivityId = null) {
   const activities = state.activities.filter(a => a.id !== excludedActivityId);
-  const count = activities.filter(a => recordFor(a, memberId)?.attended).length;
-  return { count, rate: activities.length ? Math.round(count / activities.length * 100) : 0 };
+  const activityDates = new Set(activities.map(a => a.date));
+  const attendedDates = new Set(activities.filter(a => recordFor(a, memberId)?.attended).map(a => a.date));
+  const count = attendedDates.size;
+  return { count, rate: activityDates.size ? Math.round(count / activityDates.size * 100) : 0 };
 }
 function personHtml(m, rate = null) {
   const rateText = rate === null ? "" : ` ・ 参加率：${rate}%`;
@@ -309,8 +311,8 @@ function renderCollectorOptions() {
 function renderStats() {
   const activityCount = state.activities.length, totalAttendance = state.activities.reduce((n, a) => n + a.records.filter(r => r.attended).length, 0), totalPaid = state.activities.reduce((n, a) => n + a.records.filter(r => r.paid).length, 0), totalExpense = state.activities.reduce((n, a) => n + (Number(a.expense) || 0), 0), totalRevenue = totalPaid * 100, balance = totalRevenue - totalExpense;
   $("stat-activities").textContent = activityCount; $("stat-attendance").textContent = totalAttendance; $("stat-revenue").textContent = formatYen(totalRevenue); $("stat-expense").textContent = formatYen(totalExpense); $("stat-balance").textContent = formatYen(balance); $("stat-balance").classList.toggle("negative", balance < 0); $("stat-average").textContent = activityCount ? (totalAttendance / activityCount).toFixed(1) : "0";
-  const rows = state.members.map(m => { const count = state.activities.filter(a => recordFor(a, m.id)?.attended).length; return { name: m.name, count, rate: activityCount ? Math.round(count / activityCount * 100) : 0 }; }).sort((a, b) => b.count - a.count);
-  $("member-stats").innerHTML = rows.map(x => `<div class="stat-row"><strong>${esc(x.name)}</strong><span>${x.count}回参加</span><strong>${x.rate}%</strong></div>`).join("") || `<div class="empty">データがありません</div>`;
+  const rows = state.members.map(m => ({ name: m.name, ...participationStats(m.id) })).sort((a, b) => b.rate - a.rate || b.count - a.count);
+  $("member-stats").innerHTML = rows.map(x => `<div class="stat-row"><strong>${esc(x.name)}</strong><span>${x.count}日参加</span><strong>${x.rate}%</strong></div>`).join("") || `<div class="empty">データがありません</div>`;
   const universities = {}; state.members.forEach(m => { const uni = m.university || "未設定"; universities[uni] = (universities[uni] || 0) + state.activities.filter(a => recordFor(a, m.id)?.attended).length; });
   $("university-stats").innerHTML = Object.entries(universities).sort((a,b) => b[1] - a[1]).map(([name, count]) => `<div class="stat-row"><strong>${esc(name)}</strong><span>${count}回参加</span></div>`).join("") || `<div class="empty">データがありません</div>`;
 }
@@ -319,8 +321,8 @@ function downloadFile(content, name, type) {
   const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([content], { type })); link.download = name; link.click(); URL.revokeObjectURL(link.href);
 }
 $("export-csv").addEventListener("click", () => {
-  const headers = ["名前", "大学", "性別", "参加回数", "参加率", "支払回数", "支払合計"];
-  const lines = state.members.map(m => { const attended = state.activities.filter(a => recordFor(a, m.id)?.attended).length, paid = state.activities.filter(a => recordFor(a, m.id)?.paid).length, rate = state.activities.length ? Math.round(attended / state.activities.length * 100) + "%" : "0%"; return [m.name, m.university, m.gender, attended, rate, paid, paid * 100]; });
+  const headers = ["名前", "大学", "性別", "参加日数", "参加率", "支払回数", "支払合計"];
+  const lines = state.members.map(m => { const stats = participationStats(m.id), paid = state.activities.filter(a => recordFor(a, m.id)?.paid).length; return [m.name, m.university, m.gender, stats.count, stats.rate + "%", paid, paid * 100]; });
   downloadFile(toCsv([headers, ...lines]), `v-ridge-members-${new Date().toISOString().slice(0,10)}.csv`, "text/csv;charset=utf-8");
 });
 $("export-activities-csv").addEventListener("click", () => {
