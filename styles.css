@@ -26,6 +26,7 @@ nav { display: flex; gap: 8px; }
 .auth-screen { position: fixed; inset: 0; padding: 20px; background: linear-gradient(135deg, #123e2d, #287f61); display: grid; place-items: center; z-index: 100; }
 .auth-screen[hidden] { display: none; }
 .auth-card { width: min(420px, 100%); padding: 28px; border-radius: 22px; background: white; display: grid; gap: 16px; box-shadow: 0 30px 80px rgba(0,0,0,.28); }
+.auth-card[hidden] { display: none; }
 .auth-card > p:not(.eyebrow) { color: var(--muted); font-size: 13px; line-height: 1.7; }
 .auth-logo { width: 76px; height: 76px; border-radius: 18px; }
 .form-error { min-height: 18px; color: #a33; font-size: 12px; }
